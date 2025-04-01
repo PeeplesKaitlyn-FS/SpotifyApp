@@ -1,0 +1,17 @@
+{
+  "name": "spotifyapp",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "mongodb": "^6.15.0",
+    "react-scripts": "^5.0.1",
+    "spotify-web-api-js": "^1.5.2"
+  }
+}
