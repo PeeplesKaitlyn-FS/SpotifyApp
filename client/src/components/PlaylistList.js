@@ -14,8 +14,9 @@ function PlaylistList() {
     }
 
     axios
-      .get(`${API_BASE_URL}/playlists`, {
+      .get(`${API_BASE_URL}/me/playlists`, {
         headers: { Authorization: `Bearer ${token}` },
+        params: { limit: 20, offset: 0 },
       })
       .then((response) => setPlaylists(response.data.items))
       .catch((error) => {
@@ -29,8 +30,8 @@ function PlaylistList() {
       <h1>Your Playlists</h1>
       <ul>
         {playlists.length > 0 ? (
-          playlists.map((playlist, index) => (
-            <li key={index}>{playlist.name}</li>
+          playlists.map((playlist) => (
+            <li key={playlist.id}>{playlist.name}</li>
           ))
         ) : (
           <p>No playlists found.</p>
