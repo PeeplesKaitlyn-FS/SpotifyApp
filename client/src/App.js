@@ -1,24 +1,37 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Login from './components/Login';
-import Search from './components/Search';
-import Artist from './components/Artist';
-import Albums from './components/Albums';
-import Callback from './components/Callback';
-import AuthSpotify from './components/AuthSpotify';
-import './App.css';
-import './index.css';
+import React from "react";
+import { BrowserRouter as Router, Route, Routes, NavLink } from "react-router-dom";
+import Home from "./components/Home";
+import Callback from "./pages/Callback";
+import Profile from "./pages/Profile";
+import Dashboard from "./pages/Dashboard"; 
 
-const App = () => {
+const API_BASE_URL = "http://localhost:3000"; 
+
+function App() {
   return (
     <Router>
+      <nav style={{ textAlign: "center", padding: "10px" }}>
+        <NavLink 
+          to="/" 
+          style={({ isActive }) => ({ marginRight: "20px", fontWeight: isActive ? 'bold' : 'normal', color: isActive ? 'green' : 'black' })}>
+          Home
+        </NavLink>
+        <NavLink 
+          to="/dashboard" 
+          style={({ isActive }) => ({ marginRight: "20px", fontWeight: isActive ? 'bold' : 'normal', color: isActive ? 'green' : 'black' })}>
+          Dashboard
+        </NavLink>
+        <NavLink 
+          to="/profile" 
+          style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal', color: isActive ? 'green' : 'black' })}>
+          Profile
+        </NavLink>
+      </nav>
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/search" element={<Search />} />
-        <Route path="/artist/:id" element={<Artist />} />
-        <Route path="/artist/:id/albums" element={<Albums />} />
+        <Route path="/" element={<Home />} />
         <Route path="/callback" element={<Callback />} />
-        <Route path="/auth/spotify" element={<AuthSpotify />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </Router>
   );
