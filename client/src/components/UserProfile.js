@@ -14,7 +14,7 @@ function UserProfile() {
     }
 
     axios
-      .get(`${API_BASE_URL}/profile`, {
+      .get(`${API_BASE_URL}/me`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => setProfile(response.data))
