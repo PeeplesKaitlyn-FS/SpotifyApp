@@ -7,7 +7,7 @@ const API_BASE_URL = "http://localhost:3000";
 function Profile() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const token = localStorage.getItem("accessToken");
+  const token = localStorage.getItem("accessToken"); 
   const navigate = useNavigate(); 
 
   useEffect(() => {
@@ -19,7 +19,7 @@ function Profile() {
 
     axios
       .get(`${API_BASE_URL}/profile`, {
-        headers: { Authorization: `Bearer ${token}` }, 
+        withCredentials: true, 
       })
       .then((response) => {
         setProfile(response.data);
