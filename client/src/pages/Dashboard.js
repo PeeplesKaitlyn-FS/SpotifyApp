@@ -1,10 +1,14 @@
 import React from "react";
+import DashboardLinks from "../components/DashboardLinks";  
 
 const Dashboard = () => {
   return (
-    <div style={{ textAlign: "center", padding: "20px" }}>
-      <h1>Spotify Dashboard</h1>
-      <p>Welcome to your Spotify dashboard!</p>
+    <div className="dashboard-container">
+      <div className="dashboard-content">
+        <h1>Spotify Dashboard</h1>
+        <p>Welcome to your personalized Spotify dashboard!</p>
+        <DashboardLinks />
+      </div>
     </div>
   );
 };
