@@ -10,6 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "dotenv": "^16.4.7",
     "mongodb": "^6.15.0",
     "react-scripts": "^5.0.1",
     "spotify-web-api-js": "^1.5.2"
