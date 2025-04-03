@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import './App.css';
+import { useParams } from "react-router-dom";
+import '../App.css';
 
 const TrackList = () => {
   const [tracks, setTracks] = useState([]);
@@ -8,8 +9,9 @@ const TrackList = () => {
   const [error, setError] = useState(null);
   const [nextUrl, setNextUrl] = useState(null);
   const token = localStorage.getItem("accessToken");
+  const { id } = useParams();
 
-  const fetchSavedTracks = async (url = "http://localhost:3000/me/tracks") => {
+  const fetchTracks = useCallback(async (url = `https://api.spotify.com/v1/playlists/${id}/tracks`) => {
     if (!token) return;
     try {
       const response = await axios.get(url, {
@@ -19,29 +21,40 @@ const TrackList = () => {
       setTracks((prev) => [...prev, ...response.data.items]);
       setNextUrl(response.data.next);
     } catch (err) {
-      setError(`Failed to fetch tracks: ${err.message}`);
+      console.error(err);
+      if (err.response.status === 401) {
+        // Token is invalid or expired, re-authenticate the user
+        localStorage.removeItem("accessToken");
+        window.location.href = "/login";
+      } else {
+        setError(`Failed to fetch tracks: ${err.message}`);
+      }
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, token]);
 
   useEffect(() => {
-    fetchSavedTracks();
-  }, []);
+    fetchTracks();
+  }, [fetchTracks]);
 
   return (
-    <div>
-      <h1>Your Saved Tracks</h1>
-      {loading && <p>Loading your saved tracks...</p>}
-      {error && <p>{error}</p>}
-      <ul>
-        {tracks.map((track) => (
-          <li key={track.track.id}>
-            <strong>{track.track.name}</strong> by {track.track.artists.map((artist) => artist.name).join(", ")}
-          </li>
-        ))}
-      </ul>
-      {nextUrl && !loading && <button onClick={() => fetchSavedTracks(nextUrl)}>Load more</button>}
+    <div className="dashboard-container">
+      <div className="dashboard-content">
+        <h1>Tracks in Playlist {id}</h1>
+        {loading && <p>Loading tracks...</p>}
+        {error && <p>{error}</p>}
+        <ul className="track-list">
+          {tracks.map((track, index) => (
+            <li key={index}>
+              <img src={track.track.album.images[0].url} alt={track.track.name} />
+              <strong>{track.track.name}</strong>
+              <p>Artist: {track.track.artists[0].name}</p>
+            </li>
+          ))}
+        </ul>
+        {nextUrl && !loading && <button onClick={() => fetchTracks(nextUrl)}>Load more</button>}
+      </div>
     </div>
   );
 };
