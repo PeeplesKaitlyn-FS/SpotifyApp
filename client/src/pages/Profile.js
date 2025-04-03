@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom"; 
+import './App.css';
+ 
 
 const API_BASE_URL = "http://localhost:3000"; 
 
