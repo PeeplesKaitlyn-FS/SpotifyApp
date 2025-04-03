@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import './App.css';
+import { useNavigate, Link } from "react-router-dom";
+import '../App.css';
 
 const API_BASE_URL = "http://localhost:3000";
 
-function PlaylistList() {
+function Playlists() {
   const [playlists, setPlaylists] = useState([]);
   const token = localStorage.getItem("accessToken");
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!token) {
       alert("Please log in to view your playlists.");
+      navigate("/login"); 
       return;
     }
 
@@ -21,25 +24,22 @@ function PlaylistList() {
       })
       .then((response) => setPlaylists(response.data.items))
       .catch((error) => {
-        console.error("Error fetching playlists:", error);
-        alert("Failed to fetch playlists. Please try again.");
+        console.error(error);
       });
-  }, [token]);
+  }, [token, navigate]);
 
   return (
-    <div style={{ textAlign: "center", padding: "20px" }}>
-      <h1>Your Playlists</h1>
+    <div>
+      <h1>Playlists</h1>
       <ul>
-        {playlists.length > 0 ? (
-          playlists.map((playlist) => (
-            <li key={playlist.id}>{playlist.name}</li>
-          ))
-        ) : (
-          <p>No playlists found.</p>
-        )}
+        {playlists.map((playlist) => (
+          <li key={playlist.id}>
+            <Link to={`/playlists/${playlist.id}`}>{playlist.name}</Link>
+          </li>
+        ))}
       </ul>
     </div>
   );
 }
 
-export default PlaylistList;
+export default Playlists;
