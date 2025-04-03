@@ -40,7 +40,7 @@ const SCOPES = ['user-read-private',
   'user-read-email',
   'playlist-read-private',
   'playlist-read-collaborative',
-  'playlist-modify-public'];
+  'playlist-modify-public', 'user-library-read'];
 
 app.get('/', (req, res) => {
   res.redirect('/login');
