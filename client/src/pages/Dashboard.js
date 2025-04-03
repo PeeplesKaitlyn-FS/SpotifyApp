@@ -1,5 +1,6 @@
 import React from "react";
 import DashboardLinks from "../components/DashboardLinks";  
+import './App.css';
 
 const Dashboard = () => {
   return (
