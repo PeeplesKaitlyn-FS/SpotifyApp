@@ -71,45 +71,44 @@ app.get('/login', async function(req, res) {
 });
 
 app.get('/callback', function(req, res) {
-    const code = req.query.code || null;
-    const state = req.query.state || null;
+  const code = req.query.code || null;
+  const state = req.query.state || null;
 
-    if (state === null || state !== req.session.state) {
-        return res.redirect('/#' + querystring.stringify({ error: 'state_mismatch' }));
-    }
+  if (state === null || state !== req.session.state) {
+    return res.redirect('/#' + querystring.stringify({ error: 'state_mismatch' }));
+  }
 
-    const codeVerifier = req.session.code_verifier;
+  const codeVerifier = req.session.code_verifier;
 
-    const authOptions = {
-        url: 'https://accounts.spotify.com/api/token',
-        headers: {
-            'Authorization': 'Basic ' + (new Buffer.from(CLIENT_ID + ':' + CLIENT_SECRET).toString('base64'))
-        },
-        form: {
-            grant_type: 'authorization_code',
-            code: code,
-            redirect_uri: REDIRECT_URI,
-            code_verifier: codeVerifier,
-        },
-        json: true
-    };
+  const authOptions = {
+    url: 'https://accounts.spotify.com/api/token',
+    headers: {
+      'Authorization': 'Basic ' + (new Buffer.from(CLIENT_ID + ':' + CLIENT_SECRET).toString('base64'))
+    },
+    form: {
+      grant_type: 'authorization_code',
+      code: code,
+      redirect_uri: REDIRECT_URI,
+      code_verifier: codeVerifier,
+    },
+    json: true
+  };
 
-    axios.post(authOptions.url, querystring.stringify(authOptions.form), {
-        headers: { 'Authorization': authOptions.headers['Authorization'], 'Content-Type': 'application/x-www-form-urlencoded' }
-    })
-    .then(response => {
-        const { access_token, refresh_token } = response.data;
-    
-        req.session.access_token = access_token;
-        req.session.refresh_token = refresh_token;
-    
-        console.log('Access Token:', access_token);  
-        res.redirect('/dashboard');
-    })
-    .catch(error => {
-        console.error('Error exchanging code for token:', error);
-        res.status(500).send('Error exchanging code for token');
-    });
+  axios.post(authOptions.url, querystring.stringify(authOptions.form), {
+    headers: { 'Authorization': authOptions.headers['Authorization'], 'Content-Type': 'application/x-www-form-urlencoded' }
+  })
+  .then(response => {
+    const { access_token, refresh_token } = response.data;
+    console.log('Access Token:', access_token);
+    console.log('Refresh Token:', refresh_token);
+    req.session.access_token = access_token;
+    req.session.refresh_token = refresh_token;
+    res.redirect('http://localhost:3001/dashboard');
+  })
+  .catch(error => {
+    console.error('Error exchanging code for token:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  });
 });
     
 
@@ -125,7 +124,7 @@ const generateRandomString = (length) => {
 
 const generateCodeChallenge = async (codeVerifier) => {
   const sha256 = (plain) => {
-    return crypto.createHash('sha256').update(plain).digest();
+    return crypto.createHash('sha256', 'utf8').update(plain).digest();
   };
 
   const base64encode = (input) => {
@@ -139,121 +138,88 @@ const generateCodeChallenge = async (codeVerifier) => {
   return base64encode(hashed);
 };
 
+
 app.get('/profile', async (req, res) => {
     const accessToken = req.session.access_token;
-
-    if (!accessToken) {
-        return res.redirect('/login');
-    }
-
+    if (!accessToken) return res.status(401).json({ error: 'Not authenticated' });
+  
     try {
-        const userResponse = await axios.get('https://api.spotify.com/v1/me', {
-            headers: { 'Authorization': `Bearer ${accessToken}` }
-        });
-
-        const userProfile = userResponse.data;
-
-        res.send(`
-            <h1>Your Profile</h1>
-            <p>Name: ${userProfile.display_name}</p>
-            <p>Email: ${userProfile.email}</p>
-            <a href="/dashboard">Back to Dashboard</a>
-        `);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+      const { data } = await axios.get('https://api.spotify.com/v1/me', {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      res.json(data);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Failed to fetch profile' });
     }
-});
-
-
+  });  
 
   app.get('/playlists', async (req, res) => {
     const accessToken = req.session.access_token;
-  
-    if (!accessToken) {
-      return res.redirect('/login');
-    }
+    if (!accessToken) return res.status(401).json({ error: 'Not authenticated' });
   
     try {
-      const playlistsResponse = await axios.get('https://api.spotify.com/v1/me/playlists', {
-        headers: { 'Authorization': `Bearer ${accessToken}` }
+      const { data } = await axios.get('https://api.spotify.com/v1/me/playlists', {
+        headers: { Authorization: `Bearer ${accessToken}` }
       });
-  
-      const playlists = playlistsResponse.data.items;
-  
-      res.send(`
-        <h1>Your Playlists</h1>
-        <ul>
-          ${playlists.map(playlist => `<li>${playlist.name}</li>`).join('')}
-        </ul>
-        <a href="/dashboard">Back to Dashboard</a>
-      `);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      res.json(data);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Failed to fetch playlists' });
     }
   });
   
+
   app.get('/tracks', async (req, res) => {
     const accessToken = req.session.access_token;
-  
-    if (!accessToken) {
-      return res.redirect('/login');
-    }
+    if (!accessToken) return res.status(401).json({ error: 'Not authenticated' });
   
     try {
-      const tracksResponse = await axios.get('https://api.spotify.com/v1/me/tracks', {
-        headers: { 'Authorization': `Bearer ${accessToken}` }
+      const { data } = await axios.get('https://api.spotify.com/v1/me/tracks', {
+        headers: { Authorization: `Bearer ${accessToken}` }
       });
-  
-      const savedTracks = tracksResponse.data.items;
-  
-      res.json({ items: savedTracks });
-    } catch (error) {
-      console.error('Error fetching saved tracks:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      res.json(data);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Failed to fetch tracks' });
     }
   });
-  
   
 
 app.get('/refresh', async (req, res) => {
-  const refreshToken = req.session.refresh_token;
+    const refreshToken = req.session.refresh_token;
 
-  if (!refreshToken) {
-    return res.status(401).json({ error: 'Refresh token is missing' });
-  }
+    if (!refreshToken) {
+        return res.status(401).json({ error: 'Refresh token is missing' });
+    }
 
-  try {
-    const tokenResponse = await axios.post('https://accounts.spotify.com/api/token', querystring.stringify({
-      grant_type: 'refresh_token',
-      refresh_token: refreshToken,
-      client_id: CLIENT_ID,
-      client_secret: CLIENT_SECRET
-    }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+    try {
+        const tokenResponse = await axios.post('https://accounts.spotify.com/api/token', querystring.stringify({
+            grant_type: 'refresh_token',
+            refresh_token: refreshToken,
+            client_id: CLIENT_ID,
+            client_secret: CLIENT_SECRET
+        }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
 
-    const newAccessToken = tokenResponse.data.access_token;
-    req.session.access_token = newAccessToken;
+        const newAccessToken = tokenResponse.data.access_token;
+        req.session.access_token = newAccessToken;
 
-    res.json({ access_token: newAccessToken });
-  } catch (error) {
-    console.error('Error refreshing token:', error);
-    res.status(500).json({ error: 'Failed to refresh access token' });
-  }
+        res.json({ access_token: newAccessToken });
+    } catch (error) {
+        console.error('Error refreshing token:', error);
+        res.status(500).json({ error: 'Failed to refresh access token' });
+    }
 });
-
 
 const path = require("path");
 
 app.use(express.static(path.join(__dirname, "../client/build"))); 
 
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../client/build", "index.html"));
+    res.sendFile(path.join(__dirname, "../client/build", "index.html"));
 });
-
-
 
 const PORT = 3000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
