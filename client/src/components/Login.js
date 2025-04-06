@@ -12,8 +12,6 @@ function Login() {
     <div>
         <h1>Login to Spotify</h1>
         <p>Click the button below to login with your Spotify account.</p>
-        <p>This will redirect you to Spotify's login page.</p>
-        <p>After logging in, you will be redirected back to this application.</p>
       <button onClick={handleLogin}>Login</button>
     </div>
   );
