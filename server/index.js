@@ -99,8 +99,6 @@ app.get('/callback', function(req, res) {
   })
   .then(response => {
     const { access_token, refresh_token } = response.data;
-    console.log('Access Token:', access_token);
-    console.log('Refresh Token:', refresh_token);
     req.session.access_token = access_token;
     req.session.refresh_token = refresh_token;
     res.redirect('http://localhost:3001/dashboard');
@@ -185,7 +183,46 @@ app.get('/profile', async (req, res) => {
     }
   });
   
-
+  app.get('/playlists/:id/tracks', async (req, res) => {
+    const accessToken = req.session.access_token;
+    const playlistId = req.params.id;
+  
+    if (!accessToken) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+  
+    try {
+      const response = await axios.get(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+  
+      res.json(response.data); 
+    } catch (error) {
+      console.error('Failed to fetch playlist tracks:', error.response?.data || error.message);
+      res.status(500).json({ error: 'Failed to fetch playlist tracks' });
+    }
+  });
+  
+  app.get("/search", async (req, res) => {
+    const accessToken = req.session.access_token;
+    if (!accessToken) return res.status(401).json({ error: "Not authenticated" });
+  
+    const query = req.query.q;
+    const type = req.query.type || "track";
+    const limit = req.query.limit || 100; 
+  
+    try {
+      const { data } = await axios.get(`https://api.spotify.com/v1/search`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        params: { q: query, type, limit },
+      });
+      res.json(data);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Failed to search tracks" });
+    }
+  });
+  
 app.get('/refresh', async (req, res) => {
     const refreshToken = req.session.refresh_token;
 
