@@ -83,6 +83,26 @@ Edit
 npm start
 This will start the React development server on http://localhost:3001.
 
+### 4. Start the Development Servers
+Start the Backend (Express Server)
+In the server directory, run the following command:
+
+bash
+Copy
+Edit
+node index.js
+This will start the server on http://localhost:3000.
+
+Start the Frontend (React Client)
+In the client directory, run the following command:
+
+bash
+Copy
+Edit
+npm start
+This will start the React development server on http://localhost:3001.
+
+
 ### 5. Open the App
 Once both servers are running, open your browser and visit http://localhost:3001. You'll be redirected to log in to Spotify and then redirected back to view your profile, playlists, and search for music.
 
