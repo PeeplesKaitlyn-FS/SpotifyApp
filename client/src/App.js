@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { BrowserRouter as Router, Route, Routes, NavLink, useNavigate } from "react-router-dom";
-import './App.css';
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Link,
+  useNavigate,
+  Navigate,
+} from "react-router-dom";
+import "./App.css";
 
 import Playlists from "./components/PlaylistList";
 import TrackList from "./components/TrackList";
@@ -11,10 +18,10 @@ const API_BASE_URL = "http://localhost:3000"; // Backend URL
 
 function Home() {
   return (
-    <div style={{ textAlign: "center", padding: "20px" }}>
+    <div className="home-container">
       <h1>Spotify Authorization Code Flow</h1>
       <a href={`${API_BASE_URL}/login`}>
-        <button style={{ padding: "10px 20px", fontSize: "16px" }}>Login with Spotify</button>
+        <button className="login-button">Login with Spotify</button>
       </a>
     </div>
   );
@@ -23,59 +30,115 @@ function Home() {
 function Callback() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const code = new URLSearchParams(window.location.search).get("code");
 
     if (!code) {
-      alert("Authorization code missing.");
-      navigate('/');
+      setError("Authorization code missing.");
+      navigate("/");
       return;
     }
 
-    axios.get(`${API_BASE_URL}/callback?code=${code}`)
-      .then((response) => {
-        const token = response.data.access_token;
-        const refreshToken = response.data.refresh_token;
-        localStorage.setItem('accessToken', token);
-        localStorage.setItem('refreshToken', refreshToken);
+    axios
+      .get(`${API_BASE_URL}/callback?code=${code}`, { withCredentials: true })
+      .then(() => {
         navigate("/dashboard");
       })
-      .catch((error) => {
-        console.error("Error fetching token:", error);
+      .catch((err) => {
+        console.error(err);
+        setError("Authentication failed.");
+      })
+      .finally(() => {
         setLoading(false);
-        alert("Failed to authenticate. Please try again.");
       });
   }, [navigate]);
 
-  return loading ? <div>Loading...</div> : <div>Authentication Failed</div>;
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
+  return <div>Redirecting...</div>;
 }
 
 function Dashboard() {
   return (
-    <div style={{ textAlign: "center", padding: "20px" }}>
+    <div className="dashboard-container">
       <h1>Spotify Dashboard</h1>
       <p>Welcome to your Spotify dashboard!</p>
+      <ul>
+        <li>
+          <Link to="/profile">Profile</Link>
+        </li>
+        <li>
+          <Link to="/playlists">Playlists</Link>
+        </li>
+      </ul>
     </div>
   );
+}
+
+function ProtectedRoute({ children }) {
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
+
+  useEffect(() => {
+    axios
+      .get(`${API_BASE_URL}/profile`, { withCredentials: true })
+      .then(() => setIsAuthenticated(true))
+      .catch(() => setIsAuthenticated(false));
+  }, []);
+
+  if (isAuthenticated === null) return <div>Checking authentication...</div>;
+  if (isAuthenticated === false) return <Navigate to="/" />;
+
+  return children;
 }
 
 function App() {
   return (
     <Router>
-      <nav style={{ textAlign: "center", padding: "10px" }}>
-        <NavLink to="/" style={{ marginRight: "20px" }} activeStyle={{ fontWeight: 'bold', color: 'green' }}>Home</NavLink>
-        <NavLink to="/dashboard" style={{ marginRight: "20px" }} activeStyle={{ fontWeight: 'bold', color: 'green' }}>Dashboard</NavLink>
-        <NavLink to="/profile" style={{ marginRight: "20px" }} activeStyle={{ fontWeight: 'bold', color: 'green' }}>Profile</NavLink>
-        <NavLink to="/playlists" activeStyle={{ fontWeight: 'bold', color: 'green' }}>Playlists</NavLink>
+      <nav className="nav-bar">
+        <Link to="/" className="nav-link">Home</Link>
+        <Link to="/dashboard" className="nav-link">Dashboard</Link>
+        <Link to="/profile" className="nav-link">Profile</Link>
+        <Link to="/playlists" className="nav-link">Playlists</Link>
       </nav>
+
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/callback" element={<Callback />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/playlists" element={<Playlists />} />
-        <Route path="/playlists/:id" element={<TrackList />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/playlists"
+          element={
+            <ProtectedRoute>
+              <Playlists />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/playlists/:id"
+          element={
+            <ProtectedRoute>
+              <TrackList />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </Router>
   );
