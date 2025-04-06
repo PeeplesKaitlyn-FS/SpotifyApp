@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 
 const DashboardLinks = () => {
@@ -11,7 +11,7 @@ const DashboardLinks = () => {
           method: "GET",
           credentials: "same-origin", 
         });
-  
+
         if (response.ok) {
           setIsAuthenticated(true);
         } else {
@@ -22,7 +22,7 @@ const DashboardLinks = () => {
         setIsAuthenticated(false);
       }
     };
-  
+
     checkAuth();
   }, []);
 
@@ -37,16 +37,15 @@ const DashboardLinks = () => {
   if (!isAuthenticated) {
     return (
       <nav>
-        <p>Please <NavLink to="/login">Login to Spotify</NavLink> first.</p>
+        <p>Please <NavLink to="/login" className="nav-link">Login to Spotify</NavLink> first.</p>
       </nav>
     );
   }
 
   return (
     <nav>
-      <NavLink to="/profile">Profile</NavLink>
-      <NavLink to="/playlists">Playlists</NavLink>
-      <NavLink to="/tracks">Tracks</NavLink>
+      <NavLink to="/profile" className="nav-link">Profile</NavLink>
+      <NavLink to="/playlists" className="nav-link">Playlists</NavLink>
     </nav>
   );
 };
