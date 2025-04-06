@@ -1,62 +1,39 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-import '../App.css';
 
-const TrackList = () => {
-  const [tracks, setTracks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [nextUrl, setNextUrl] = useState(null);
-  const token = localStorage.getItem("accessToken");
+const API_BASE_URL = "http://localhost:3000";
+
+function TrackList() {
   const { id } = useParams();
-
-  const fetchTracks = useCallback(async (url = `https://api.spotify.com/v1/playlists/${id}/tracks`) => {
-    if (!token) return;
-    try {
-      const response = await axios.get(url, {
-        headers: { Authorization: `Bearer ${token}` },
-        params: { limit: 20, offset: 0 },
-      });
-      setTracks((prev) => [...prev, ...response.data.items]);
-      setNextUrl(response.data.next);
-    } catch (err) {
-      console.error(err);
-      if (err.response.status === 401) {
-        // Token is invalid or expired, re-authenticate the user
-        localStorage.removeItem("accessToken");
-        window.location.href = "/login";
-      } else {
-        setError(`Failed to fetch tracks: ${err.message}`);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [id, token]);
+  const [tracks, setTracks] = useState([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    fetchTracks();
-  }, [fetchTracks]);
+    axios
+      .get(`${API_BASE_URL}/playlists/${id}/tracks`, { withCredentials: true })
+      .then((res) => setTracks(res.data.items))
+      .catch((err) => {
+        console.error(err);
+        setError("Failed to fetch tracks.");
+      });
+  }, [id]);
+
+  if (error) return <div>{error}</div>;
+  if (!tracks.length) return <div>Loading tracks...</div>;
 
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-content">
-        <h1>Tracks in Playlist {id}</h1>
-        {loading && <p>Loading tracks...</p>}
-        {error && <p>{error}</p>}
-        <ul className="track-list">
-          {tracks.map((track, index) => (
-            <li key={index}>
-              <img src={track.track.album.images[0].url} alt={track.track.name} />
-              <strong>{track.track.name}</strong>
-              <p>Artist: {track.track.artists[0].name}</p>
-            </li>
-          ))}
-        </ul>
-        {nextUrl && !loading && <button onClick={() => fetchTracks(nextUrl)}>Load more</button>}
-      </div>
+    <div className="tracklist-container">
+      <h2>Tracks</h2>
+      <ul>
+        {tracks.map((item) => (
+          <li key={item.track.id}>
+            {item.track.name} - {item.track.artists.map(a => a.name).join(", ")}
+          </li>
+        ))}
+      </ul>
     </div>
   );
-};
+}
 
 export default TrackList;
