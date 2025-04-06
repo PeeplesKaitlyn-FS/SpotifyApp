@@ -1,3 +1,4 @@
+/* Global styles */
 body {
   margin: 0;
   padding: 0;
@@ -7,24 +8,8 @@ body {
   text-align: center;
 }
 
-.App {
-  text-align: center;
-}
-
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.App-header {
-  background-color: #1db954;
-  padding: 20px;
-  font-size: 24px;
-  font-weight: bold;
-}
-
-nav {
+/* Navigation bar */
+.nav-bar {
   background-color: #282c34;
   padding: 10px;
   display: flex;
@@ -32,24 +17,51 @@ nav {
   gap: 20px;
 }
 
-nav a {
+.nav-link {
   color: #1db954;
   font-size: 18px;
   text-decoration: none;
   font-weight: bold;
 }
 
-nav a:hover {
+.nav-link:hover {
   color: white;
 }
 
+.active-link {
+  font-weight: bold;
+  color: green;
+}
+
+/* Home page */
+.home-container {
+  text-align: center;
+  padding: 40px;
+}
+
+.login-button {
+  background-color: #1db954;
+  border: none;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.login-button:hover {
+  background-color: #17a34a;
+}
+
+/* Dashboard */
 .dashboard-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
-  height: 100vh;
   justify-content: center;
+  height: 100vh;
 }
 
 .dashboard-content {
@@ -61,34 +73,53 @@ nav a:hover {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
-button {
-  background-color: #1db954;
-  border: none;
-  padding: 10px 20px;
-  font-size: 16px;
-  font-weight: bold;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: 0.3s;
+/* Profile */
+.profile-container {
+  margin-top: 40px;
 }
 
-button:hover {
-  background-color: #17a34a;
+.profile-container img {
+  border-radius: 50%;
+  margin-top: 10px;
 }
 
-.track-list {
+/* Playlist */
+.playlist-container {
+  padding: 30px;
+}
+
+.playlist-container ul {
   list-style: none;
   padding: 0;
 }
 
-.track-list li {
+.playlist-container li {
+  margin: 10px 0;
+}
+
+.playlist-container a {
+  color: #1db954;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.playlist-container a:hover {
+  color: white;
+}
+
+/* Tracks */
+.tracklist-container {
+  padding: 30px;
+}
+
+.tracklist-container ul {
+  list-style: none;
+  padding: 0;
+}
+
+.tracklist-container li {
   background: rgba(255, 255, 255, 0.1);
   margin: 10px 0;
   padding: 10px;
   border-radius: 5px;
-}
-
-.track-list li strong {
-  color: #1db954;
 }
