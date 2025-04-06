@@ -24,14 +24,25 @@ function TrackList() {
 
   return (
     <div className="tracklist-container">
-      <h2>Tracks</h2>
-      <ul>
-        {tracks.map((item) => (
-          <li key={item.track.id}>
-            {item.track.name} - {item.track.artists.map(a => a.name).join(", ")}
-          </li>
-        ))}
-      </ul>
+      <h2 className="tracklist-heading">Tracks</h2>
+      <div className="track-grid">
+        {tracks.map((item) => {
+          const track = item.track;
+          const trackImage = track.album.images[0]?.url; 
+
+          return (
+            <div key={track.id} className="track-item">
+              <div className="track-image-container">
+                {trackImage && <img src={trackImage} alt={track.name} className="track-image" />}
+              </div>
+              <div className="track-info">
+                <span className="track-name">{track.name}</span> -{" "}
+                <span className="track-artists">{track.artists.map((a) => a.name).join(", ")}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
