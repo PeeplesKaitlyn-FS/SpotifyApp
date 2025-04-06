@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
-import '../App.css';
- 
 
 const DashboardLinks = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -13,7 +11,7 @@ const DashboardLinks = () => {
           method: "GET",
           credentials: "same-origin", 
         });
-
+  
         if (response.ok) {
           setIsAuthenticated(true);
         } else {
@@ -24,22 +22,31 @@ const DashboardLinks = () => {
         setIsAuthenticated(false);
       }
     };
-
+  
     checkAuth();
   }, []);
 
-  console.log("Is authenticated:", isAuthenticated);  
+  if (isAuthenticated === null) {
+    return (
+      <nav>
+        <p>Loading...</p>
+      </nav>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <nav>
+        <p>Please <NavLink to="/login">Login to Spotify</NavLink> first.</p>
+      </nav>
+    );
+  }
+
   return (
     <nav>
-      {isAuthenticated ? (
-        <>
-          <NavLink to="/profile">Profile</NavLink>
-          <NavLink to="/playlists">Playlists</NavLink>
-          <NavLink to="/tracks">Tracks</NavLink>
-        </>
-      ) : (
-        <p>Please <NavLink to="/login">Login to Spotify</NavLink> first.</p>
-      )}
+      <NavLink to="/profile">Profile</NavLink>
+      <NavLink to="/playlists">Playlists</NavLink>
+      <NavLink to="/tracks">Tracks</NavLink>
     </nav>
   );
 };
