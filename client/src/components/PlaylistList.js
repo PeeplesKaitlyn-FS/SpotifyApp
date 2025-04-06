@@ -1,36 +1,29 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
-import '../App.css';
+import { Link } from "react-router-dom";
 
 const API_BASE_URL = "http://localhost:3000";
 
-function Playlists() {
+function PlaylistList() {
   const [playlists, setPlaylists] = useState([]);
-  const token = localStorage.getItem("accessToken");
-  const navigate = useNavigate();
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!token) {
-      alert("Please log in to view your playlists.");
-      navigate("/login"); 
-      return;
-    }
-
     axios
-      .get(`${API_BASE_URL}/me/playlists`, {
-        headers: { Authorization: `Bearer ${token}` },
-        params: { limit: 20, offset: 0 },
-      })
-      .then((response) => setPlaylists(response.data.items))
-      .catch((error) => {
-        console.error(error);
+      .get(`${API_BASE_URL}/playlists`, { withCredentials: true })
+      .then((res) => setPlaylists(res.data.items))
+      .catch((err) => {
+        console.error(err);
+        setError("Failed to fetch playlists.");
       });
-  }, [token, navigate]);
+  }, []);
+
+  if (error) return <div>{error}</div>;
+  if (!playlists.length) return <div>Loading playlists...</div>;
 
   return (
-    <div>
-      <h1>Playlists</h1>
+    <div className="playlist-container">
+      <h2>Your Playlists</h2>
       <ul>
         {playlists.map((playlist) => (
           <li key={playlist.id}>
@@ -42,4 +35,4 @@ function Playlists() {
   );
 }
 
-export default Playlists;
+export default PlaylistList;
